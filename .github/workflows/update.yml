@@ -1,0 +1,26 @@
+name: Update Movies Daily
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Daily 12:00 AM UTC (approx 5 AM Pakistan time)
+  workflow_dispatch:     # Manual run option
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install node-fetch@2
+      - run: node fetch_movies.js
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add movies.json
+          git commit -m "Auto update movie list"
+          git push
